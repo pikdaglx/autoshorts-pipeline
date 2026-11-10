@@ -150,12 +150,13 @@ Se você utiliza um assistente de código com suporte a MCP / Terminal (como **A
 ```markdown
 Quero que você instale, configure e opere o projeto AutoShorts Pipeline na minha máquina para produzir e postar cortes virais no meu canal do YouTube Shorts.
 
-1. CLONAR E INSTALAR:
-- Clone o repositório oficial: https://github.com/pikdaglx/autoshorts-pipeline.git
+1. CLONAR, CRIAR MEU REPOSITÓRIO PRIVADO NO GITHUB E INSTALAR:
+- Clone o repositório base: `git clone https://github.com/pikdaglx/autoshorts-pipeline.git`
 - Entre na pasta `autoshorts-pipeline`.
-- Verifique se o `ffmpeg`, `python` (>=3.11) e `uv` estão instalados no sistema (se faltar algum, instale via winget/apt/brew ou crie um `.venv` padrão).
+- Desvincule o remote original (`git remote remove origin`) e crie um novo repositório **PRIVADO** na minha própria conta do GitHub (usando `gh repo create autoshorts-pipeline --private --source=. --remote=origin --push` ou configurando a URL do meu repositório privado no GitHub) para que somente eu tenha acesso ao meu projeto e às minhas automações.
+- Verifique se o `ffmpeg`, `python` (>=3.11), `gh` (GitHub CLI) e `uv` estão instalados no sistema (se faltar algum, instale via winget/apt/brew ou crie um `.venv` padrão).
 - Rode `uv sync` para instalar todas as dependências do `pyproject.toml` (incluindo `faster-whisper`, `yt-dlp`, `google-api-python-client`, `google-genai`, `typer`, `rich`).
-- Copie `.env.example` para `.env`.
+- Copie `.env.example` para `.env` (garanta que `.env`, `client_secret.json` e `token.json` jamais sejam enviados ao Git, pois já estão protegidos no `.gitignore`).
 
 2. CONFIGURAR CREDENCIAIS:
 - Verifique se já coloquei o meu arquivo `client_secret.json` (OAuth 2.0 Desktop App do Google Cloud) na raiz do projeto. Se ainda não estiver lá, me avise e me guie para colocar.
