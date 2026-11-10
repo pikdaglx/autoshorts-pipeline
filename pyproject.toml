@@ -1,0 +1,22 @@
+[project]
+name = "autoshorts-pipeline"
+version = "1.0.0"
+description = "Pipeline Automatizado de Cortes Virais para YouTube Shorts (9:16 Vertical, Legendas Dinâmicas Karaokê, Auditoria QA, Whisper Local e Upload/Agendamento Automático)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "faster-whisper>=1.1.0",
+    "google-api-python-client>=2.100.0",
+    "google-auth>=2.20.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.0.0",
+    "google-genai>=1.0.0",
+    "python-dotenv>=1.2.4",
+    "rich>=15.0.0",
+    "typer>=0.27.3",
+    "youtube-transcript-api>=1.2.4",
+    "yt-dlp>=2026.8.19",
+]
+
+[tool.uv]
+package = false

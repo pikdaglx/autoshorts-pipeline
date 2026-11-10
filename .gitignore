@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Chaves, Credenciais OAuth e Segredos (NUNCA VERSIONAR)
+.env
+.env.*
+!.env.example
+*.key
+client_secret*.json
+!client_secret.example.json
+token*.json
+cookies.txt
+
+# Pastas de saida, cache e arquivos de midia gerados
+output/
+temp/
+scratch/
+*.mp4
+*.m4a
+*.wav
+*.ass
+*.srt
+!assets/music/*.mp3

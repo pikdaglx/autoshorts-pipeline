@@ -1,0 +1,109 @@
+name: "✂️ AutoCortes Podcast para YouTube Shorts"
+
+on:
+  workflow_dispatch:
+    inputs:
+      youtube_url:
+        description: "Link do YouTube do podcast ou entrevista"
+        required: true
+        type: string
+      privacy:
+        description: "Visibilidade no YouTube"
+        required: false
+        default: "private"
+        type: choice
+        options: [private, unlisted, public]
+      publish_at:
+        description: "Data/Hora de agendamento (UTC ISO, ex: 2026-10-18T21:00:00Z) - deixe vazio para imediato"
+        required: false
+        default: ""
+        type: string
+      count:
+        description: "Quantidade de cortes a gerar"
+        required: false
+        default: "1"
+        type: string
+      start_sec:
+        description: "Segundo inicial (opcional)"
+        required: false
+        default: ""
+        type: string
+      end_sec:
+        description: "Segundo final (opcional)"
+        required: false
+        default: ""
+        type: string
+      title:
+        description: "Título personalizado (opcional)"
+        required: false
+        default: ""
+        type: string
+      hook:
+        description: "Banner superior de gancho (opcional, ex: '🚨 O MAIOR ERRO DA VIDA')"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  cut-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar FFmpeg e Fontes do Sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation
+
+      - name: Instalar dependências Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib google-genai python-dotenv rich typer youtube-transcript-api yt-dlp curl-cffi bgutil-ytdlp-pot-provider
+
+      - name: Configurar credenciais do Google OAuth
+        run: |
+          echo '${{ secrets.GOOGLE_TOKEN_JSON }}' > token.json
+          echo '${{ secrets.GOOGLE_CLIENT_SECRET_JSON }}' > client_secret.json
+          if [ -n "${{ secrets.YOUTUBE_COOKIES }}" ]; then
+            echo '${{ secrets.YOUTUBE_COOKIES }}' > cookies.txt
+            echo "YOUTUBE_COOKIES_FILE=cookies.txt" >> $GITHUB_ENV
+          fi
+
+      - name: Configurar variáveis de ambiente (.env)
+        run: |
+          echo "OUTPUT_DIR=./output" >> .env
+          echo "CI=true" >> .env
+          if [ -n "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+          fi
+
+      - name: Validar credenciais do Google
+        run: python -m src.cli auth
+
+      - name: Executar AutoCortes e Publicar no YouTube
+        run: >
+          python -m src.cli clip
+          "${{ github.event.inputs.youtube_url }}"
+          --privacy "${{ github.event.inputs.privacy }}"
+          --count "${{ github.event.inputs.count }}"
+          ${{ github.event.inputs.publish_at && format('--publish-at "{0}"', github.event.inputs.publish_at) || '' }}
+          ${{ github.event.inputs.start_sec && format('--start {0}', github.event.inputs.start_sec) || '' }}
+          ${{ github.event.inputs.end_sec && format('--end {0}', github.event.inputs.end_sec) || '' }}
+          ${{ github.event.inputs.title && format('--title "{0}"', github.event.inputs.title) || '' }}
+          ${{ github.event.inputs.hook && format('--hook "{0}"', github.event.inputs.hook) || '' }}
+
+      - name: Salvar artefatos de vídeo gerados
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shorts-gerados
+          path: output/*.mp4
+          retention-days: 7
